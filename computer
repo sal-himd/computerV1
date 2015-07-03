@@ -1,0 +1,18 @@
+#!/usr/bin/ruby
+
+#union.rb
+#By : sal-himd
+
+$stdout.sync = true
+
+if ARGV[0] && !ARGV[1]
+	if /^(0 |((\+ |\- )?[0-9]+ \* x\^[0-2] )+((\+ |\- )[0-9]+ \* x\^[0-2] )*)=( 0|( (\+ |\- )?[0-9]+ \* x\^[0-2])+( (\+ |\- )[0-9]+ \* x\^[0-2])*)$/ =~ ARGV[0]
+		my_match = ARGV[0].scan(/[\+\-]? ?[0-9]+ \* x\^[0-2]/)
+		my_match.each do |str|
+			print (/\^/.match(str.gsub!(/\s+/, "")).post_match).to_i
+			print "\n"
+		end
+		puts my_match
+	end
+end
+print "\n"
