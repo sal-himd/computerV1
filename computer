@@ -1,18 +1,50 @@
 #!/usr/bin/ruby
 
-#union.rb
+#computer
 #By : sal-himd
 
-$stdout.sync = true
+require_relative 'Parser.rb'
+require_relative 'Resolver.rb'
+require_relative 'Numeric.rb'
 
-if ARGV[0] && !ARGV[1]
-	if /^(0 |((\+ |\- )?[0-9]+ \* x\^[0-2] )+((\+ |\- )[0-9]+ \* x\^[0-2] )*)=( 0|( (\+ |\- )?[0-9]+ \* x\^[0-2])+( (\+ |\- )[0-9]+ \* x\^[0-2])*)$/ =~ ARGV[0]
-		my_match = ARGV[0].scan(/[\+\-]? ?[0-9]+ \* x\^[0-2]/)
-		my_match.each do |str|
-			print (/\^/.match(str.gsub!(/\s+/, "")).post_match).to_i
-			print "\n"
-		end
-		puts my_match
+class Numeric
+	def convert
+		i, f = self.to_i, self.to_f
+  		i == f ? i : f
 	end
 end
-print "\n"
+
+if ARGV[0] && !ARGV[1]
+	equa_parse = Parser.new(equation: ARGV[0])
+	if equa_parse.is_valid?
+		reduce_fmt = equa_parse.reduce
+		power = equa_parse.set_power
+		sign = equa_parse.set_sign
+		equa = Resolver.new(equa_parse.result)
+		equa.resolve
+
+		print "Reduced form: "
+		if power > 0
+			reduce_fmt.each_with_index do |coeff, index|
+			print "#{sign[index]}#{coeff.my_abs.convert} * X^#{index} " if coeff != 0
+			end
+			print "= 0\n"
+		else
+			puts "#{sign[0]}#{reduce_fmt[0].my_abs.convert} * X^0 = 0"
+		end
+		puts "Polynomial degree: #{power}"
+		if power < 3
+			result = equa.result
+			puts 'There is a infinity of solutions' if result == 'infinity'
+			puts 'There is no solution' if result == 'no solution'
+			puts "The solution is \n#{result.convert}" if result.is_a? Numeric
+			puts "Discriminant is strictly positive, the two solution are:\n#{result[0]}\n#{result[1]}" if result.is_a? Array
+		else
+			puts "The polynomial degree is stricly greater than 2, I can't solve."
+		end
+	else
+		puts "Wrong format"
+	end
+else
+	puts "Wrong number of argument"
+end
